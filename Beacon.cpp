@@ -4,39 +4,43 @@
 
 #define SERIAL_WRITE(command)\
 	for (int i=0; i<command.length(); i++) {\
-		beaconSerial.write((byte) command[i]);\
+		_beaconSerial->write((byte) command[i]);\
 	}
 
 Beacon::Beacon(int rx, int tx) {
-	SoftwareSerial beaconSerial(rx, tx);
+	_beaconSerial = new SoftwareSerial(rx, tx);
+	_beaconSerial->begin(9600);
 	_rx = rx;
 	_tx = tx;
 }
 
-void Beacon::isConnenting() {
-	SERIAL_WRITE("AT");
+void Beacon::isConnecting() {
+	String beacon_connect = "AT";
+	SERIAL_WRITE(beacon_connect);
 }
 
 void Beacon::reset() {
-	SERIAL_WRITE("AT+RESET");
+	String beacon_reset = "AT+RESET";
+	SERIAL_WRITE(beacon_reset);
 }
 
 void Beacon::renew() {
-	SERIAL_WRITE("AT+RENEW");
+	String beacon_renew = "AT+RENEW";
+	SERIAL_WRITE(beacon_renew);
 }
 
 void Beacon::setName(String name) {
-	Stirng beacon_name = "AT+NAME" + name;
+	String beacon_name = "AT+NAME" + name;
 	SERIAL_WRITE(beacon_name);
 }
 
 void Beacon::setInterval(int interval) {
-	Stirng beacon_interval = "AT+ADVI" + String(interval);
+	String beacon_interval = "AT+ADVI" + String(interval);
 	SERIAL_WRITE(beacon_interval);
 }
 
 void Beacon::setMajor(unsigned int major) {
-	
+
 	String beacon_major = "AT+MARJ0x";
 
 	if (major > 16*16*16*16) {
@@ -62,7 +66,7 @@ void Beacon::setMajor(unsigned int major) {
 }
 
 void Beacon::setMinor(unsigned int minor) {
-	
+
 	String beacon_minor = "AT+MARJ0x";
 
 	if (minor > 16*16*16*16) {
@@ -87,7 +91,7 @@ void Beacon::setMinor(unsigned int minor) {
 	SERIAL_WRITE(beacon_minor);
 }
 
-/**
+*
  * Set Advertising Type
  * AT+ADTY[Param]
  * Param : 0~3
@@ -95,9 +99,9 @@ void Beacon::setMinor(unsigned int minor) {
  * 1 : Only allow last device connect in 1.28s
  * 2 : Allow advertising and scan response
  * 3 : Only allow advertising, non-connectable
- */
+
 void Beacon::setAdvertisingType(int type) {
-	Stirng beacon_advertising_type = "AT+ADTY0";
+	String beacon_advertising_type = "AT+ADTY0";
 
 	switch(type) {
 		case 0:
@@ -116,7 +120,7 @@ void Beacon::setAdvertisingType(int type) {
 			beacon_advertising_type = "AT+ADTY3";
 			break;
 
-		defalut: 
+		defalut:
 			beacon_advertising_type = "AT+ADTY0";
 			break;
 	}
@@ -129,14 +133,18 @@ void Beacon::setAdvertisingType(int type) {
  * AT+IBEA[Param]
  * Param : 0~1
  * 0 : Turn off iBeacon (Default)
- * 1 : Turn on iBeacon 
+ * 1 : Turn on iBeacon
  */
 void Beacon::setIbeaconMode(boolean enable) {
-	Stirng beacon_ibeacon_mode = "AT+IBEA0";
+	String beacon_ibeacon_mode = "AT+IBEA0";
 	if(enable) {
 		beacon_ibeacon_mode = "AT+IBEA1";
 	}
-	SERIAL_WRITE(beacon_ibeacon_mode);
+//	SERIAL_WRITE(beacon_ibeacon_mode);
+
+	for (int i=0; i<beacon_ibeacon_mode.length(); i++) {
+		_beaconSerial->write((byte) beacon_ibeacon_mode[i]);
+	}
 }
 
 /**
@@ -147,7 +155,7 @@ void Beacon::setIbeaconMode(boolean enable) {
  * 2 : Only allow broadcast
  */
 void Beacon::setIbeaconDeploy(int type) {
-	Stirng beacon_ibeacon_deploy = "AT+DELO1";
+	String beacon_ibeacon_deploy = "AT+DELO1";
 
 	switch(type) {
 		case 1:
@@ -158,7 +166,7 @@ void Beacon::setIbeaconDeploy(int type) {
 			beacon_ibeacon_deploy = "AT+DELO2";
 			break;
 
-		defalut: 
+		defalut:
 			beacon_ibeacon_deploy = "AT+DELO1";
 			break;
 	}
@@ -174,12 +182,9 @@ void Beacon::setIbeaconDeploy(int type) {
  * 1 : No auto sleep (Default)
  */
 void Beacon::setAutoSleep(boolean enable) {
-	Stirng beacon_auto_sleep = "AT+PWRM1";
+	String beacon_auto_sleep = "AT+PWRM1";
 	if(enable) {
 		beacon_auto_sleep = "AT+PWRM0";
 	}
 	SERIAL_WRITE(beacon_auto_sleep);
 }
-
-
-

@@ -27,6 +27,7 @@ class Beacon
   private:
     int _rx;
     int _tx;
+    SoftwareSerial* _beaconSerial;
 };
  
 #endif
